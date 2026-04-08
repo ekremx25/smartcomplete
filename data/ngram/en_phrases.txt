@@ -1,0 +1,787 @@
+# English phrase completions
+# Format: trigger_word1 trigger_word2 completion frequency
+# When user types trigger words, suggest the full completion
+# Frequency guide: very common = 450-500, common = 350-450, less common = 250-350
+
+# ============================================================
+# 1. Greetings & Small Talk
+# ============================================================
+how are you doing 500
+how are you today 480
+how are you feeling 460
+how are things going 440
+how are your parents 350
+how is it going 480
+how is everything going 460
+how is your day 450
+how is your family 400
+how is life treating 380
+how is your health 370
+how is the weather 360
+how is your work 370
+how is the project 340
+how do you do 450
+how do you feel 430
+how do you know 420
+how do i look 380
+how do we start 350
+how did you find 380
+how did it go 400
+how did you get 370
+how did that happen 360
+what are you doing 480
+what are you up to 470
+what are you thinking 430
+what are your plans 420
+what are you working on 400
+what are we having 360
+what are the options 370
+what is going on 470
+what is your name 450
+what is the problem 440
+what is the plan 430
+what is the matter 420
+what is your opinion 380
+what is the deadline 350
+what is happening here 370
+nice to meet you 500
+nice to see you 480
+nice to hear from 450
+nice to talk to 430
+nice to finally meet 400
+nice to have you 390
+good to see you 480
+good to hear that 460
+good to know that 440
+good to be here 420
+good to be back 410
+good to have you 390
+glad to hear that 430
+glad to see you 420
+glad to help you 380
+glad you made it 370
+pleased to meet you 430
+pleased to announce that 370
+pleased to inform you 360
+long time no see 420
+it has been a while 400
+
+# ============================================================
+# 2. Common Expressions
+# ============================================================
+thank you so much 500
+thank you very much 490
+thank you for your 480
+thank you for everything 450
+thank you for coming 430
+thank you for helping 420
+thank you for the 410
+thank you for sharing 400
+thank you for understanding 390
+thank you in advance 380
+i am going to 480
+i am looking for 460
+i am trying to 450
+i am sorry for 440
+i am happy to 430
+i am glad to 420
+i am not sure 470
+i am afraid that 380
+i am available for 370
+i am willing to 360
+i am interested in 400
+i am planning to 390
+i was wondering if 460
+i was thinking about 440
+i was going to 430
+i was looking for 420
+i was hoping to 410
+i was told that 370
+i was surprised by 350
+i was able to 380
+i have been to 400
+i have been working 390
+i have never seen 380
+i have always wanted 370
+i have no idea 430
+i have a question 410
+i have to admit 360
+i have already done 350
+i need to go 450
+i need to know 440
+i need some help 430
+i need your help 420
+i need more time 410
+i need to talk 400
+i need a break 380
+i need to think 370
+i want to know 450
+i want to go 440
+i want to see 430
+i want to be 420
+i want to make 410
+i want to tell 400
+i want you to 390
+i think we should 460
+i think it is 450
+i think you should 440
+i think that is 430
+i think so too 420
+i think about it 400
+i think you are right 380
+i don't know what 470
+i don't think so 460
+i don't want to 450
+i don't care about 420
+i don't have time 430
+i don't understand why 410
+i don't mind at all 380
+i don't see the point 360
+i can't believe it 450
+i can't wait to 440
+i can't stop thinking 410
+i can't find the 400
+i can't help it 390
+i can't do this 380
+i can't make it 370
+we should go to 420
+we should talk about 410
+we should meet up 400
+we should try to 390
+we should figure out 380
+we should probably leave 350
+we need to talk 450
+we need to go 430
+we need to find 420
+we need more time 400
+we need your help 390
+we need a plan 370
+you should try to 420
+you should go to 410
+you should check out 400
+you should talk to 390
+you should come with 370
+you should probably leave 340
+you can do it 450
+you can find it 420
+you can have it 400
+you can try again 390
+you can always count 370
+you can trust me 360
+it was nice to 440
+it was good to 430
+it was great to 420
+it was supposed to 400
+it was meant to 390
+it was hard to 380
+it was really nice 370
+
+# ============================================================
+# 3. Professional / Email
+# ============================================================
+please let me know 480
+please let us know 460
+please let me check 420
+please find attached the 430
+please find below the 410
+please find enclosed the 370
+i hope you are 460
+i hope this helps 450
+i hope everything is 430
+i hope we can 420
+i hope to see 400
+i hope you enjoy 380
+i hope you understand 370
+looking forward to hearing 490
+looking forward to seeing 480
+looking forward to meeting 470
+looking forward to working 460
+looking forward to your 440
+as per our discussion 400
+as per your request 390
+as per the agreement 370
+as per the schedule 350
+in order to ensure 380
+in order to avoid 370
+in order to achieve 360
+in order to complete 350
+with regard to the 380
+with regard to your 370
+with regard to this 360
+on behalf of the 400
+on behalf of our 380
+on behalf of my 360
+i would like to 470
+i would appreciate if 420
+i would love to 440
+i would suggest that 400
+i would recommend that 390
+i would prefer to 370
+we are pleased to 400
+we are happy to 410
+we are looking for 420
+we are writing to 390
+we are sorry to 380
+we are delighted to 360
+please do not hesitate 420
+please do let me 390
+please do feel free 370
+i am writing to 430
+i am pleased to 400
+i am available for 380
+i am reaching out 410
+i am following up 390
+i am confirming that 350
+per our conversation the 350
+per your request the 340
+for your reference the 330
+for your information the 350
+at your earliest convenience 370
+at your discretion please 310
+with reference to the 360
+with respect to the 370
+further to our conversation 340
+further to your email 330
+kindly note that the 340
+kindly confirm your availability 320
+kindly let us know 350
+i wanted to follow up 400
+i wanted to let you know 390
+i wanted to check in 380
+i just wanted to update 370
+i just wanted to confirm 360
+
+# ============================================================
+# 4. Casual / Chat
+# ============================================================
+do you want to 470
+do you know what 450
+do you have any 440
+do you think that 430
+do you remember when 400
+do you feel like 380
+do you mind if 390
+did you know that 430
+did you see the 420
+did you hear about 410
+did you get my 400
+did you finish the 380
+did you talk to 370
+can you believe it 430
+can you help me 450
+can you send me 420
+can you tell me 440
+can you come over 380
+can you do me 370
+can you pick up 360
+could you please help 420
+could you let me 400
+could you send the 390
+could you do me 370
+could you check on 360
+would you like to 450
+would you mind if 430
+would you rather have 380
+would you be able 400
+would you prefer to 370
+let me know if 470
+let me know when 450
+let me think about 420
+let me check on 400
+let me get back 410
+let me see what 380
+don't worry about it 460
+don't worry too much 400
+don't worry i got 380
+don't worry be happy 360
+no problem at all 440
+no problem happy to 400
+no problem glad to 390
+sounds good to me 450
+sounds good let's do 420
+sounds good i agree 400
+that sounds great to 420
+that sounds like a 430
+that sounds really good 400
+that sounds like fun 390
+that sounds about right 370
+i feel like we 400
+i feel so bad 370
+i feel the same 390
+i feel much better 380
+i feel so good 370
+i feel like going 350
+you know what i 380
+you know how it 360
+hang on a second 380
+hang on let me 370
+hold on a minute 380
+hold on let me 370
+come on let's go 400
+catch up with you 370
+
+# ============================================================
+# 5. Opinions & Arguments
+# ============================================================
+the thing is that 420
+the thing about it 380
+the thing you need 360
+the point is that 410
+the point of the 380
+the point i am 360
+the problem is that 430
+the problem with the 400
+the problem we have 370
+the reason is that 410
+the reason why i 390
+the reason for this 370
+in my opinion the 400
+in my experience the 390
+in my view the 370
+in my humble opinion 350
+to be honest with 420
+to be fair to 390
+to be perfectly honest 370
+to be frank with 360
+as far as i 430
+as far as we 400
+as far as they 370
+it depends on the 410
+it depends on what 400
+it depends on how 390
+it depends on who 370
+i agree with you 430
+i agree completely with 380
+i agree that we 390
+i agree on that 370
+i disagree with you 380
+i disagree on that 350
+i disagree completely with 330
+on the other hand 420
+on the one hand 390
+on second thought maybe 350
+having said that i 340
+that being said we 350
+the bottom line is 370
+at the end of the day 380
+let's not forget that 350
+the fact is that 390
+the truth is that 400
+the reality is that 370
+
+# ============================================================
+# 6. Time & Planning
+# ============================================================
+at the same time 450
+at the end of 440
+at the beginning of 410
+at the moment i 390
+at the latest by 350
+at the very least 370
+by the way did 420
+by the time we 400
+by the end of 410
+by the looks of 370
+by the way i 390
+for the first time 440
+for the last time 420
+for the most part 400
+for the time being 390
+for the record i 360
+for a long time 420
+in the first place 410
+in the long run 400
+in the meantime we 380
+in the end we 390
+in the near future 370
+in the morning we 350
+one of the best 430
+one of the most 440
+one of these days 390
+one of my friends 380
+one of the reasons 370
+most of the time 430
+most of the people 400
+most of the day 370
+most of us think 340
+some of the best 400
+some of the most 390
+some of my friends 370
+some of us are 350
+a couple of days 380
+a couple of weeks 370
+a couple of hours 360
+a couple of things 370
+right now i am 370
+right now we need 350
+sooner or later the 340
+from time to time 380
+all of a sudden 380
+all the time we 350
+every now and then 370
+once in a while 370
+once upon a time 340
+
+# ============================================================
+# 7. Emotions & Reactions
+# ============================================================
+i am so happy for 420
+i am so sorry to 440
+i am so proud of 410
+i am so excited about 400
+i am so tired of 390
+i am so grateful for 380
+i am so glad that 390
+i am so disappointed in 350
+i miss you so 420
+i miss being there 370
+i miss the old 380
+i miss those days 370
+i miss working with 340
+i love you so 440
+i love the way 420
+i love how you 410
+i love being with 390
+i love this song 370
+i love spending time 360
+i hate when people 380
+i hate to say 390
+i hate this so 360
+i hate being late 350
+i hate to bother 340
+it makes me happy 400
+it makes no sense 410
+it makes me sad 370
+it makes me angry 360
+it makes a difference 380
+it makes me wonder 350
+i wish i could 430
+i wish you were 410
+i wish i had 420
+i wish we could 400
+i wish it was 380
+i wish things were 360
+that was so funny 400
+that was really good 390
+that was the best 410
+that was amazing and 370
+that was close call 340
+that was unexpected but 330
+oh my god that 380
+i can't even believe 350
+what a beautiful day 360
+what a great idea 380
+what a wonderful surprise 340
+this is so exciting 370
+this is so frustrating 350
+this is really important 370
+
+# ============================================================
+# 8. Actions & Requests
+# ============================================================
+make sure you have 420
+make sure to check 410
+make sure that the 400
+make sure everything is 390
+make sure you are 380
+take care of yourself 440
+take care of it 420
+take care of the 400
+take care and be 380
+come on let's go 410
+come on don't be 380
+come on you can 390
+come on hurry up 370
+give me a second 420
+give me a chance 400
+give me some time 390
+give me your hand 350
+give me a break 380
+tell me about it 430
+tell me what happened 420
+tell me the truth 410
+tell me more about 400
+tell me everything you 370
+show me what you 400
+show me how to 410
+show me the way 380
+show me your best 350
+help me understand why 400
+help me find the 410
+help me with this 420
+help me figure out 390
+help me out here 370
+keep in mind that 420
+keep in touch with 410
+keep in contact with 380
+keep me updated on 370
+keep me posted about 360
+get back to you 420
+get back to me 400
+get out of here 380
+get ready for the 370
+get started on the 360
+go ahead and start 370
+go ahead and send 360
+set up a meeting 370
+set up the system 340
+figure out how to 390
+figure out what happened 370
+work on the project 350
+
+# ============================================================
+# 9. Philosophical / Wisdom
+# ============================================================
+life is too short 430
+life is what you 400
+life is all about 390
+life is not fair 380
+life is beautiful and 360
+life is full of 370
+love is all you 390
+love is patient and 380
+love is blind but 350
+love is the answer 360
+love is a journey 330
+love is worth fighting 320
+time is running out 400
+time is of the 380
+time is money and 360
+time is precious so 340
+time is on our 320
+truth is always the 370
+truth is stranger than 360
+truth is hard to 350
+truth is sometimes painful 320
+nothing is impossible if 380
+nothing is permanent in 350
+nothing is more important 370
+nothing is as simple 330
+everything happens for a 390
+everything happens in its 350
+everything happens when you 340
+actions speak louder than 410
+actions speak for themselves 370
+knowledge is power and 360
+practice makes perfect and 350
+patience is a virtue 360
+change is the only 340
+failure is not the end 350
+success is not final 340
+the best things in life 370
+the grass is always 340
+what goes around comes 350
+every cloud has a silver 330
+you only live once 380
+it is what it is 400
+tomorrow is a new day 370
+the journey is more important 330
+hard work pays off 380
+
+# ============================================================
+# 10. Questions
+# ============================================================
+what do you think 470
+what do you mean 460
+what do you want 440
+what do we do 430
+what do you suggest 410
+what do you recommend 400
+what if we just 400
+what if i told 390
+what if it doesn't 380
+what if they don't 370
+what if something goes 350
+how long have you 420
+how long will it 430
+how long does it 410
+how long has it 400
+how long until we 370
+how much does it 430
+how much do you 410
+how much is the 420
+how much time do 390
+how much longer until 360
+how many times have 400
+how many people are 390
+how many days until 370
+how many of you 350
+where do you live 400
+where do you work 390
+where do we go 380
+where do i start 370
+where do you want 380
+where can i find 420
+where can we go 400
+where can i get 390
+where can we meet 370
+when will you be 410
+when will it be 400
+when will we know 380
+when will they come 360
+when did you get 370
+when did it happen 360
+when do we leave 350
+why don't you try 400
+why don't we go 390
+why don't you come 380
+why don't we just 370
+why is it so 380
+why is this happening 370
+why are you so 360
+who do you think 400
+who do you know 370
+who do you trust 350
+who is going to 380
+who is responsible for 350
+
+# ============================================================
+# 11. Connectors & Transitions
+# ============================================================
+as a result of 380
+as a matter of 390
+as well as the 370
+in addition to the 380
+in addition to that 370
+in fact it is 360
+in other words the 350
+in any case we 340
+on top of that 380
+on the other hand 400
+not only does it 350
+not only is it 340
+rather than just doing 310
+instead of going to 320
+even though it was 360
+even though we tried 340
+due to the fact 360
+because of the way 350
+regardless of what happens 330
+no matter what happens 380
+no matter how hard 370
+no matter who you 340
+as long as you 390
+as long as we 380
+as soon as possible 430
+as soon as you 400
+as much as i 370
+in spite of the 340
+other than that everything 350
+apart from that the 330
+
+# ============================================================
+# 12. Technology & Modern Life
+# ============================================================
+can you send me the 400
+did you see the post 350
+have you tried turning 370
+have you updated your 340
+i just got a new 360
+i need to charge my 340
+let me google that 350
+let me look it up 360
+check your email for 340
+i will send you a 380
+send me the link 370
+download the latest version 320
+the wifi is not 350
+my phone is dead 340
+i saw it on 350
+i read about it 340
+have you heard of 370
+sign up for the 340
+log in to your 330
+
+# ============================================================
+# 13. Social & Plans
+# ============================================================
+are you free this 400
+are you coming to 390
+are you going to 420
+are you ready for 400
+are you sure about 390
+are we still on 380
+do you want to go 410
+do you want to come 390
+do you want to get 380
+let's go to the 400
+let's meet up at 380
+let's grab some coffee 370
+let's figure this out 360
+let's get started on 370
+let's not waste time 340
+let's take a break 370
+let's talk about it 390
+we could always try 340
+we could go to 350
+we could meet at 340
+how about we go 370
+how about we meet 360
+how about next week 350
+what time should we 370
+what time does it 360
+what time is the 350
+see you at the 380
+see you tomorrow morning 360
+see you next week 370
+see you later today 350
+pick you up at 340
+i will be there 400
+
+# ============================================================
+# 14. Hedging & Politeness
+# ============================================================
+if you don't mind 420
+if you could please 410
+if it's not too 380
+if that makes sense 370
+if i'm not mistaken 360
+if i remember correctly 370
+if you ask me 380
+if possible could you 350
+i was just wondering 400
+i just wanted to say 390
+i just wanted to check 380
+i just thought maybe 340
+i don't mean to 370
+i don't want to bother 360
+i hope i'm not 340
+i hope you don't mind 370
+excuse me could you 360
+pardon me for asking 320
+i apologize for the 380
+i apologize for any 370
+sorry to bother you 400
+sorry for the delay 390
+sorry i didn't mean 360
+sorry about that i 370
+my apologies for the 360
+
+# ============================================================
+# 15. Encouragement & Support
+# ============================================================
+you can do this 430
+you are going to 410
+you will be fine 400
+you deserve better than 360
+you should be proud 370
+you are not alone 380
+you have my support 350
+don't give up on 380
+don't be so hard 360
+don't let anyone tell 350
+believe in yourself and 360
+hang in there it 350
+keep up the good work 390
+keep going you are 360
+i believe in you 400
+i am here for you 410
+i am proud of you 400
+i support your decision 340
+that takes a lot of courage 320
+everything will be okay 380
+everything is going to 390
+things will get better 370
+stay strong and keep 340
+you've got this don't 350
+never give up on 360
