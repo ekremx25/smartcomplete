@@ -1,4 +1,4 @@
-# LinuxComplete
+# SmartComplete
 
 LinuxComplete, Wayland ortamında Fcitx5 üzerine kurulu sistem genelinde metin tamamlama ve sonraki kelime tahmini sunan bir Linux input method eklentisidir. Türkçe ve İngilizce için sözlük tabanlı öneri, bağlam farkındalığı, kullanıcı öğrenmesi, typo düzeltme ve emoji kısa kodları gibi özellikleri tek bir hafif motor içinde birleştirir.
 
