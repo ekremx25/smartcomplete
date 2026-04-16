@@ -69,12 +69,13 @@ step "Removing autostart entries..."
 
 remove_autostart_from() {
     local f="$1"
-    [ -f "$f" ] || return
-    if grep -q "SmartComplete" "$f"; then
+    [ -f "$f" ] || return 0
+    if grep -q "SmartComplete" "$f" 2>/dev/null; then
         # Remove the comment line and the following exec line.
         sed -i '/SmartComplete/,+1d' "$f"
         ok "Cleaned $f"
     fi
+    return 0
 }
 
 remove_autostart_from "$HOME/.config/hypr/execs.conf"

@@ -257,11 +257,30 @@ add_autostart_line() {
     fi
 }
 
+add_hyprland_env_block() {
+    local f="$1"
+    if grep -q "^env = GTK_IM_MODULE" "$f" 2>/dev/null; then
+        ok "Hyprland IM env already set in $f"
+        return
+    fi
+    cat >> "$f" << 'EOF'
+
+# SmartComplete — Input Method environment (session-wide, includes GUI apps)
+env = GTK_IM_MODULE,fcitx
+env = QT_IM_MODULE,fcitx
+env = XMODIFIERS,@im=fcitx
+env = SDL_IM_MODULE,fcitx
+env = GLFW_IM_MODULE,ibus
+EOF
+    ok "Hyprland IM env block added to $f"
+}
+
 case "$COMPOSITOR" in
     hyprland)
         for f in "$HOME/.config/hypr/execs.conf" "$HOME/.config/hypr/hyprland.conf"; do
             if [ -f "$f" ]; then
                 add_autostart_line "$f" "# SmartComplete" "exec-once = fcitx5 -d"
+                add_hyprland_env_block "$f"
                 break
             fi
         done
