@@ -47,6 +47,18 @@ void test_case_insensitive() {
     EXPECT(p.is_program_disabled("GNOME-Terminal"));
 }
 
+void test_prefix_match_for_custom_class_variants() {
+    // Users often set custom window classes like "kittyfloat" for floating windows.
+    // Prefix match keeps the blocklist usable without requiring every variant.
+    Predictor p({});
+    EXPECT(p.is_program_disabled("kittyfloat"));
+    EXPECT(p.is_program_disabled("kitty-scratchpad"));
+    EXPECT(p.is_program_disabled("alacritty-dropdown"));
+    // But substrings in the middle should NOT match:
+    EXPECT(!p.is_program_disabled("my-kitty-app"));
+    EXPECT(!p.is_program_disabled("super-alacritty"));
+}
+
 void test_custom_blocklist_replaces_default() {
     PredictorConfig cfg;
     cfg.disabled_programs = {"vim", "emacs"};
@@ -70,6 +82,7 @@ int main() {
     test_default_blocklist_has_common_terminals();
     test_non_terminals_are_allowed();
     test_case_insensitive();
+    test_prefix_match_for_custom_class_variants();
     test_custom_blocklist_replaces_default();
     test_empty_blocklist_allows_everything();
 

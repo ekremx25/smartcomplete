@@ -106,6 +106,8 @@ void LinuxCompleteEngine::keyEvent(const fcitx::InputMethodEntry&, fcitx::KeyEve
     // ── Pass-through for blocklisted programs (terminals, shells) ──
     // Shell tab-completion + autocorrection would fight each other,
     // and emoji shortcodes in a terminal are just noise.
+    // Matches by prefix (case-insensitive), so "kitty" also catches
+    // "kittyfloat", "kittyterm" and other custom window class variants.
     if (predictor_ && predictor_->is_program_disabled(ic->program())) {
         // Flush any pending buffer and stay out of the way.
         if (!predictor_->buffer().empty()) {

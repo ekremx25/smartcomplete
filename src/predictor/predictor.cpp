@@ -614,10 +614,14 @@ bool Predictor::should_predict() const {
 
 bool Predictor::is_program_disabled(const std::string& program) const {
     if (program.empty()) return false;
-    // Case-insensitive exact match against the blocklist.
+    // Case-insensitive match: exact match, or pattern is a prefix of program name.
+    // Prefix match catches custom window class variants like "kittyfloat", "kittyterm", etc.
     const std::string prog_lower = text_utils::to_lower_ascii(program);
     for (const auto& p : config_.disabled_programs) {
-        if (text_utils::to_lower_ascii(p) == prog_lower) return true;
+        const std::string pat = text_utils::to_lower_ascii(p);
+        if (pat.empty()) continue;
+        if (pat == prog_lower) return true;
+        if (prog_lower.rfind(pat, 0) == 0) return true; // starts with pattern
     }
     return false;
 }
