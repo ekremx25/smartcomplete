@@ -445,8 +445,21 @@ std::string AiReranker::request_ranking(const std::vector<Candidate>& candidates
     const std::string response_body = exec_curl(curl_args, timeout_seconds + 2);
 
     if (response_body.empty()) {
-        log_debug("curl returned empty response");
+        log_debug("curl returned empty response (network error or timeout)");
         return {};
+    }
+
+    // If OpenAI returned an error object, surface it in the log instead of
+    // silently swallowing it as an "empty response".
+    {
+        nlohmann::json probe = nlohmann::json::parse(response_body, nullptr, false);
+        if (!probe.is_discarded() && probe.contains("error") && probe["error"].is_object()) {
+            const auto& err = probe["error"];
+            const std::string code = err.value("code", err.value("type", std::string{"unknown"}));
+            const std::string message = err.value("message", std::string{"(no message)"});
+            log_debug("OpenAI API error [" + code + "]: " + message);
+            return {};
+        }
     }
 
     return extract_chat_content(response_body);
