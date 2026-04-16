@@ -238,6 +238,27 @@ EOF
     ok "Fcitx5 profile configured (SmartComplete as default IM)"
 fi
 
+# Global config: make IM active by default across all windows.
+CONFIG="$HOME/.config/fcitx5/config"
+if [ -f "$CONFIG" ] && grep -q "ShareInputState=All" "$CONFIG"; then
+    ok "Fcitx5 global config already has shared input state"
+else
+    [ -f "$CONFIG" ] && cp "$CONFIG" "$CONFIG.bak.$(date +%s)"
+    cat > "$CONFIG" << 'EOF'
+[Hotkey]
+EnumerateWithTriggerKeys=True
+AltTriggerKeys=Shift_L
+
+[Behavior]
+# Share active/inactive state across all windows — once activated, stays on.
+ShareInputState=All
+PreloadInputMethod=True
+ShowFirstInputMethodInformation=True
+DefaultInputMethod=linuxcomplete
+EOF
+    ok "Fcitx5 global config written (shared state — IM stays active everywhere)"
+fi
+
 # Compositor autostart.
 add_autostart_line() {
     local file="$1" marker="$2" line="$3"
@@ -280,6 +301,12 @@ case "$COMPOSITOR" in
         for f in "$HOME/.config/hypr/execs.conf" "$HOME/.config/hypr/hyprland.conf"; do
             if [ -f "$f" ]; then
                 add_autostart_line "$f" "# SmartComplete" "exec-once = fcitx5 -d"
+                # Also auto-activate IM after fcitx5 starts — otherwise
+                # apps start in "keyboard-only" mode until user presses Ctrl+Space.
+                if ! grep -q "fcitx5-remote -o" "$f"; then
+                    echo "exec-once = sleep 2 && fcitx5-remote -o" >> "$f"
+                    ok "Auto-activation added to $f"
+                fi
                 add_hyprland_env_block "$f"
                 break
             fi
