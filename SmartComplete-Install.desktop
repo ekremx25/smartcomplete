@@ -1,0 +1,9 @@
+[Desktop Entry]
+Version=1.0
+Type=Application
+Name=Install SmartComplete
+Comment=One-click installer for SmartComplete text prediction
+Icon=input-keyboard
+Exec=bash -c 'cd "$(dirname "%k")" && (x-terminal-emulator -e ./install.sh || kitty ./install.sh || alacritty -e ./install.sh || gnome-terminal -- ./install.sh || konsole -e ./install.sh || xterm -e ./install.sh || ./install.sh; read -p "Press Enter to close...")'
+Terminal=true
+Categories=Utility;
