@@ -1,245 +1,126 @@
 # SmartComplete
 
-SmartComplete (LinuxComplete) is a system-wide text completion and next-word prediction engine for Linux, built on Fcitx5 for Wayland environments. It combines dictionary-based suggestions, context awareness, user learning, typo correction, and emoji shortcodes in a single lightweight input method engine.
+**System-wide intelligent text prediction for Linux** — context-aware completion, next-word prediction, phrase completion, typo correction, emoji shortcodes, and optional AI reranking. Built on Fcitx5, works across all Wayland and X11 applications.
 
-## Highlights
+---
 
-- **System-wide**: works across browsers, editors, office suites, messaging apps, and terminal emulators
-- **Context-aware prediction**: prefix search, bigram data, phrase completion, and grammar rule scoring work together
-- **User learning**: selected words and word transitions improve suggestion ranking over time
-- **Optional AI reranker**: reorders existing candidates based on context via OpenAI API
-- **Typo correction and contraction support**: produces more natural suggestions during English typing
-- **Emoji shortcodes**: suggests emoji candidates for `:smile`-style inputs
-
-## How It Works
-
-The engine is organized into three layers:
-
-1. **`src/engine/`** — Fcitx5 integration: captures key events, builds candidate lists, and commits selected text to the active application.
-
-2. **`src/predictor/`** — Prediction logic: generates suggestions using a trie, dictionary, user frequency data, n-gram model, phrase model, and grammar rules.
-
-3. **`data/`** — Static data: system dictionaries, frequency files, n-gram data, phrase completion lists, and grammar rule files.
-
-## Features
-
-| Feature | Description |
-|---|---|
-| Prefix completion | Fast candidate list based on typed prefix |
-| Next-word prediction | Suggests next word based on context after space |
-| Phrase completion | Multi-word continuations from two-word triggers |
-| User learning | Builds user frequency and learned bigrams from selections |
-| AI reranker | Optionally reorders candidate list via OpenAI Responses API |
-| Typo correction | Suggests corrections for common misspellings |
-| Contraction support | Handles English contractions and grammar heuristics |
-| Emoji support | Suggests emojis from `:` shortcode prefixes |
-
-## Supported Applications
-
-SmartComplete works with any application that supports Fcitx5 input methods:
-
-- Firefox, Chrome, Brave
-- VS Code, Kate, Gedit
-- Kitty, Alacritty, Foot, WezTerm (terminal emulators)
-- Telegram, Discord
-- LibreOffice
-- GTK and Qt applications
-
-> **Note:** Actual behavior may vary depending on the application's Fcitx5 and surrounding text support. Auto-correction and surrounding text rewrite features are application-dependent.
-
-## Installation
-
-### Prerequisites
-
-#### Arch Linux
-
-```bash
-sudo pacman -S fcitx5 fcitx5-qt fcitx5-gtk fcitx5-configtool cmake gcc nlohmann-json
-
-# Optional: hunspell-based extended word list
-sudo pacman -S hunspell-en_us
-```
-
-#### Debian / Ubuntu
-
-```bash
-sudo apt install fcitx5 fcitx5-frontend-qt5 fcitx5-frontend-gtk3 fcitx5-config-qt cmake g++ nlohmann-json3-dev
-```
-
-#### Fedora
-
-```bash
-sudo dnf install fcitx5 fcitx5-qt fcitx5-gtk fcitx5-configtool cmake gcc-c++ json-devel
-```
-
-### Building from Source
+## Install (one command)
 
 ```bash
 git clone https://github.com/ekremx25/smartcomplete.git
 cd smartcomplete
-mkdir -p build && cd build
-cmake ..
-cmake --build . -j"$(nproc)"
+./install.sh
 ```
 
-### Installing Data Files
+That's it. The installer detects your distro (Arch, Debian, Fedora), installs dependencies, builds the project, runs the test suite, installs the Fcitx5 addon, configures environment variables, sets up the Fcitx5 profile, wires autostart into your compositor (Hyprland, Niri, Sway, GNOME, KDE), and verifies the installation — all in one run.
 
-```bash
-sudo mkdir -p /usr/share/linuxcomplete/{dict,frequency,ngram,rules,config}
-sudo cp data/dict/*.txt /usr/share/linuxcomplete/dict/
-sudo cp data/frequency/*.txt /usr/share/linuxcomplete/frequency/
-sudo cp data/ngram/*.txt /usr/share/linuxcomplete/ngram/
-sudo cp data/rules/*.txt /usr/share/linuxcomplete/rules/
-sudo cp config/linuxcomplete.conf /usr/share/linuxcomplete/config/
+**Uninstall:** `./uninstall.sh` (add `--purge` to also delete your learned words).
 
-# Create user data directory
-mkdir -p ~/.local/share/linuxcomplete/user
-```
+**GUI launcher:** double-click `SmartComplete-Install.desktop` from your file manager.
 
-### Fcitx5 Environment Variables
+---
 
-Add the following to your shell profile (`~/.bashrc` or `~/.zshrc`):
+## How it works
 
-```bash
-export GTK_IM_MODULE=fcitx
-export QT_IM_MODULE=fcitx
-export XMODIFIERS=@im=fcitx
-export SDL_IM_MODULE=fcitx
-export GLFW_IM_MODULE=ibus
-```
+SmartComplete combines six prediction strategies into a single ranked candidate list:
 
-### Compositor Autostart
+| Strategy | Source | What it gives you |
+|---|---|---|
+| **Trie prefix search** | 84K-word dictionary | Fast completions as you type |
+| **Bigram prediction** | 48K word-pair frequencies | Next-word suggestions after space |
+| **Phrase completion** | 787 multi-word triggers | Common expressions (`how are` → `you doing`) |
+| **Grammar rules** | 26K+ contextual patterns | Natural verb/modal/preposition usage |
+| **Typo correction** | Edit-distance + rules | Fixes common misspellings |
+| **Emoji shortcodes** | 303 entries | `:smile` → 😊, `:heart` → ❤️ |
 
-#### Hyprland
+Every selection you make **improves future rankings** — user frequency gets a 10× multiplier in the scoring model, persisted to disk.
 
-Add to `~/.config/hypr/execs.conf` or `hyprland.conf`:
+---
 
-```bash
-exec-once = fcitx5 -d
-```
+## Architecture
 
-#### Niri
-
-Add to `~/.config/niri/config.kdl`:
+Layered design, each layer independently testable:
 
 ```
-spawn-at-startup "fcitx5" "-d"
+┌─────────────────────────────────────────┐
+│  Fcitx5 Engine                          │  src/engine/
+│    key events → candidate list → commit │  (engine, engine_config, text_utils)
+├─────────────────────────────────────────┤
+│  Prediction Engine                      │  src/predictor/
+│    6 strategies + AI reranker + scoring │
+├─────────────────────────────────────────┤
+│  Data Layer                             │  data/
+│    dict, frequency, ngram, rules, emoji │
+└─────────────────────────────────────────┘
 ```
 
-#### Sway
+Key design decisions:
+- **Data-driven**: zero hardcoded word/rule data — all 26K+ rules and 303 emoji are loaded from external `data/*` files
+- **O(1) rule lookups**: grammar rules indexed by hash map (26K rules, constant-time queries)
+- **Shared utilities**: `text_utils` module eliminates duplicated lowercase/fold/case-match logic
+- **Secure AI path**: OpenAI calls use `fork()/execvp()` directly (no shell subprocess, no command injection surface)
+- **Terminal pass-through**: input methods make no sense in shells — SmartComplete stays out of the way in 27 known terminal emulators and shells
 
-Add to `~/.config/sway/config`:
-
-```bash
-exec fcitx5 -d
-```
-
-### Fcitx5 Profile Setup
-
-To set SmartComplete as the default input method:
-
-```bash
-killall fcitx5 2>/dev/null || true
-
-mkdir -p ~/.config/fcitx5
-
-cat > ~/.config/fcitx5/profile <<'EOF'
-[Groups/0]
-Name=Default
-Default Layout=us
-DefaultIM=linuxcomplete
-
-[Groups/0/Items/0]
-Name=keyboard-us
-Layout=us
-
-[Groups/0/Items/1]
-Name=linuxcomplete
-Layout=
-
-[GroupOrder]
-0=Default
-EOF
-
-fcitx5 -d
-```
-
-Alternatively, use `fcitx5-configtool` to add SmartComplete via the GUI.
+---
 
 ## Usage
 
-| Key | Behavior |
+| Key | Action |
 |---|---|
-| `Tab` | Accept the first or selected suggestion |
-| `Up` / `Down` | Navigate between candidates |
-| `Enter` | Accept the selected suggestion or commit the active buffer |
-| `Space` | Commit the word and trigger next-word prediction |
-| `Esc` | Dismiss the open candidate list |
-| `:` | Start emoji shortcode mode |
+| `Tab` | Accept first or selected suggestion |
+| `↑` / `↓` | Navigate candidates |
+| `Enter` | Accept selected, or commit buffer |
+| `Space` | Commit word + show next-word prediction |
+| `Esc` | Dismiss candidates |
+| `:smile` | Emoji shortcode mode |
 
-## Tests
+Common auto-corrections: `dont` → `don't`, `i am` → `I'm`, `you are` → `you're`, `we are` → `we're`, `they are` → `they're`, `it is` → `it's`.
 
-The project includes the following regression tests:
+---
 
-- English grammar sanity check
-- Predictor learning regression test
-- Predictor quality regression test
-- AI reranker regression test
-- Data quality regression test
-- Rules validation test
+## Terminal pass-through
 
-To run all tests:
+SmartComplete automatically disables itself in programs where shell completion handles prediction natively. Default blocklist:
 
-```bash
-cd build
-ctest --output-on-failure
+**Terminal emulators:** kitty, alacritty, foot, wezterm, xterm, urxvt, rxvt, st, gnome-terminal, konsole, xfce4-terminal, lxterminal, mate-terminal, deepin-terminal, terminator, tilix, hyper, terminology, blackbox, ptyxis, cool-retro-term, termite
+
+**Shells / multiplexers:** zsh, bash, fish, tmux, screen
+
+Customize via `~/.config/linuxcomplete/linuxcomplete.conf`:
+
+```jsonc
+{
+    // Add to the default list without replacing it:
+    "disabled_programs_extend": ["vim", "emacs", "code"],
+
+    // Or replace the default list entirely:
+    "disabled_programs": ["only", "these", "apps"]
+}
 ```
 
-## Rules Tool
+---
 
-Validate, normalize, or add entries to the grammar and typo rule files under `data/rules/`:
+## AI reranker (optional)
 
-```bash
-python3 scripts/rules_tool.py validate
-python3 scripts/rules_tool.py normalize
-python3 scripts/rules_tool.py normalize --write
-python3 scripts/rules_tool.py stats
-python3 scripts/rules_tool.py check-conflicts
-python3 scripts/rules_tool.py resolve-conflicts
-python3 scripts/rules_tool.py resolve-conflicts --write
-python3 scripts/rules_tool.py add-typo dontt "don't"
-python3 scripts/rules_tool.py add-pair en_grammar_pair_rules.txt hello world 120
-python3 scripts/rules_tool.py add-triple en_grammar_triple_rules.txt i am ready 180
-```
+SmartComplete's core prediction works fully offline. When enabled, AI reranking **only reorders candidates already generated locally** — it never invents new words, and if the network fails the system transparently falls back to local ranking.
 
-The tool performs the following checks:
+### Design safeguards
 
-- Detects missing rule files
-- Validates field count against tab-delimited format
-- Verifies score fields are integers
-- Flags exact duplicate rows as errors
-- `normalize` sorts files and removes exact duplicates
-- `stats` summarizes row counts per file
-- `check-conflicts` reports same-key entries with both positive and negative scores
-- `resolve-conflicts` keeps the strongest absolute score and removes conflicting rows
+- **Confidence gating**: AI only invoked for ambiguous candidates (score gap below threshold)
+- **LRU cache**: identical contexts skip redundant API calls (128 entries default)
+- **Hard timeout**: 1.2s default; after that, local ranking wins
+- **No shell subprocess**: curl runs via `fork()/execvp()` with direct argv — no command injection
+- **RAII temp files**: payload files auto-cleaned even on crashes
+- **API key never logged**: passed via HTTP header only, never to argv or temp files
 
-## AI Reranker
+### Configuration
 
-AI support is disabled by default. When enabled, the predictor continues generating candidates locally; OpenAI only reorders them based on context. If the network request fails, the system automatically falls back to local ranking.
-
-The AI layer includes the following safeguards:
-
-- **Smart fallback**: AI is only invoked for genuinely ambiguous or context-sensitive candidates
-- **Confidence gating**: local ranking is preserved when the score gap is decisive
-- **Cache**: identical context and candidate lists skip redundant API calls
-- **Debug logging**: decisions and fallback reasons can be printed to the terminal
-
-Configuration via environment variables:
+Via environment variables:
 
 ```bash
-export OPENAI_API_KEY=...
+export OPENAI_API_KEY=sk-...
 export LINUXCOMPLETE_AI_ENABLED=1
-export LINUXCOMPLETE_AI_MODEL=gpt-5-mini
+export LINUXCOMPLETE_AI_MODEL=gpt-4o-mini        # default
 export LINUXCOMPLETE_AI_TIMEOUT_MS=1200
 export LINUXCOMPLETE_AI_SMART_FALLBACK=1
 export LINUXCOMPLETE_AI_GAP_THRESHOLD=160
@@ -247,31 +128,101 @@ export LINUXCOMPLETE_AI_MAX_CACHE_ENTRIES=128
 export LINUXCOMPLETE_AI_DEBUG=1
 ```
 
-Alternatively, configure via `config/linuxcomplete.conf` fields: `ai_rerank_enabled`, `ai_smart_fallback`, `ai_debug_logging`, `ai_model`, `ai_timeout_ms`, `ai_uncertainty_gap_threshold`, and `ai_max_cache_entries`.
+Or via `config/linuxcomplete.conf` — same field names without the `LINUXCOMPLETE_AI_` prefix (e.g. `ai_model`, `ai_timeout_ms`).
 
-## Technical Notes
+---
 
-- Written in C++17
-- Build system: CMake
-- Installed as a Fcitx5 addon
-- Dictionary lookup uses a UTF-32 trie
-- Ranking combines dictionary frequency, user frequency, n-gram scores, and grammar rules
-- AI layer only reranks candidates; it does not generate new ones
-- The loading layer merges duplicate n-gram and phrase entries, keeping the strongest score
-- Typo and grammar rules are loaded from external data files under `data/rules/`
+## Testing
 
-## Roadmap
+```bash
+cd build
+ctest --output-on-failure
+```
 
-See [ROADMAP.md](ROADMAP.md) for planned improvements.
+11 test suites covering every module:
 
-Key areas:
+| Test | Coverage |
+|---|---|
+| `english_grammar_sanity` | Rule file format, grammar assertions |
+| `predictor_learning_regression` | User frequency boost, bigram learning |
+| `predictor_quality_regression` | Candidate ranking, deduplication |
+| `ai_reranker_regression` | Confidence gating, cache, JSON parsing |
+| `data_quality_regression` | N-gram/phrase format, duplicate detection |
+| `text_utils` | String manipulation helpers |
+| `grammar_index` | O(1) hash map lookups |
+| `emoji_index` | Prefix-bucketed emoji search |
+| `blocklist` | Terminal pass-through logic |
+| `rules_validation` | `rules_tool.py` format checks |
+| `rules_tool_regression` | CLI tool end-to-end behavior |
 
-- Expand test coverage
-- Make predictor rules more modular
-- Improve phrase and n-gram datasets
-- Reduce application-specific behavioral differences
-- Move typo and grammar data sources to external, verifiable formats
+---
+
+## Rules tool
+
+Manage grammar and typo data files:
+
+```bash
+python3 scripts/rules_tool.py validate                                   # check format
+python3 scripts/rules_tool.py normalize --write                          # sort + dedup
+python3 scripts/rules_tool.py stats                                      # row counts
+python3 scripts/rules_tool.py check-conflicts                            # detect contradictions
+python3 scripts/rules_tool.py resolve-conflicts --write                  # keep strongest score
+python3 scripts/rules_tool.py add-typo dontt "don't"
+python3 scripts/rules_tool.py add-pair en_grammar_pair_rules.txt hello world 120
+python3 scripts/rules_tool.py add-triple en_grammar_triple_rules.txt i am ready 180
+```
+
+---
+
+## Development
+
+Manual build (without the installer):
+
+```bash
+mkdir -p build && cd build
+cmake .. -DCMAKE_BUILD_TYPE=Release
+cmake --build . -j"$(nproc)"
+ctest --output-on-failure
+sudo cmake --install .
+```
+
+Dependencies:
+- C++17 compiler (gcc/clang)
+- CMake ≥ 3.20
+- Fcitx5 + dev headers
+- nlohmann/json ≥ 3.2
+
+Project layout:
+
+```
+smartcomplete/
+├── install.sh, uninstall.sh        # one-click scripts
+├── SmartComplete-Install.desktop   # GUI launcher
+├── src/engine/                     # Fcitx5 integration
+├── src/predictor/                  # prediction engine
+├── data/                           # dictionaries, rules, emoji
+├── tests/                          # unit + regression tests
+└── scripts/                        # install + rules_tool.py
+```
+
+---
+
+## Supported applications
+
+Any application with Fcitx5 support:
+
+- **Browsers**: Firefox, Chrome, Brave
+- **Editors**: VS Code, Kate, Gedit, Sublime Text
+- **Messaging**: Telegram, Discord, Element
+- **Office**: LibreOffice
+- **All GTK and Qt applications**
+
+> **Not supported** (by design): terminal emulators and shells — see [Terminal pass-through](#terminal-pass-through).
+
+> **Note:** auto-correction features that rewrite surrounding text (e.g. `i am` → `I'm` with deletion) depend on the application exposing Fcitx5's `SurroundingText` capability. If an app doesn't support it, SmartComplete falls back to commit-only mode (no deletion).
+
+---
 
 ## License
 
-This project is licensed under the MIT License. See [LICENSE](LICENSE) for details.
+MIT — see [LICENSE](LICENSE).
