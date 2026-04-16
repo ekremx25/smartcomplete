@@ -26,6 +26,8 @@ void load_predictor_config_from_file(const std::filesystem::path& path, Predicto
     };
     read_int("max_candidates", config.max_candidates);
     read_int("min_prefix_length", config.min_prefix_length);
+    read_int("min_candidate_score", config.min_candidate_score);
+    read_int("complete_word_extension_min_score", config.complete_word_extension_min_score);
     read_bool("learn_new_words", config.learn_new_words);
     read_bool("ai_rerank_enabled", config.ai_rerank_enabled);
     read_bool("ai_smart_fallback", config.ai_smart_fallback);

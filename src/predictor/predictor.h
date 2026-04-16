@@ -15,6 +15,12 @@ namespace linuxcomplete {
 struct PredictorConfig {
     int max_candidates = 5;
     int min_prefix_length = 2;
+    // Absolute floor for candidate score — filters out rare/weird words
+    // with no frequency data (e.g. "wifehood" when you type "wife").
+    int min_candidate_score = 50;
+    // Higher bar for suggestions when the buffer IS already a valid
+    // dictionary word: only show extensions that are clearly meaningful.
+    int complete_word_extension_min_score = 150;
     bool learn_new_words = true;
     bool ai_rerank_enabled = false;
     bool ai_smart_fallback = true;

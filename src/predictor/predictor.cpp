@@ -292,6 +292,13 @@ std::vector<Candidate> Predictor::filter_candidates(const std::string& prefix,
     const int min_score = std::max(10, best_score / 8);
     const std::string folded_prefix = fold_for_matching(prefix);
 
+    // If the buffer itself is a valid dictionary word, require a higher bar
+    // for extension candidates. Prevents showing "wifehood" when you type "wife".
+    const bool buffer_is_complete_word = dictionary_.trie().contains(prefix);
+    const int extension_floor = buffer_is_complete_word
+        ? config_.complete_word_extension_min_score
+        : config_.min_candidate_score;
+
     std::vector<Candidate> filtered;
     filtered.reserve(candidates.size());
 
@@ -304,6 +311,11 @@ std::vector<Candidate> Predictor::filter_candidates(const std::string& prefix,
         const bool is_contraction = candidate.word.find('\'') != std::string::npos;
 
         if (candidate.score < min_score && !is_contraction) {
+            continue;
+        }
+
+        // Absolute floor — no rare/noise words with trivial scores.
+        if (candidate.score < extension_floor && !is_contraction) {
             continue;
         }
 
@@ -328,9 +340,9 @@ std::vector<Candidate> Predictor::filter_candidates(const std::string& prefix,
         filtered.push_back(candidate);
     }
 
-    if (filtered.empty()) {
-        filtered = std::move(candidates);
-    }
+    // Previously this fell back to the unfiltered list when nothing passed —
+    // that's what surfaced noise like "wifehood". Now we honor the filter:
+    // if nothing is good enough, show nothing.
 
     std::sort(filtered.begin(), filtered.end());
     if (filtered.size() > static_cast<size_t>(config_.max_candidates)) {
