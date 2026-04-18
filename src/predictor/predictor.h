@@ -32,6 +32,9 @@ struct PredictorConfig {
     // OpenAI-compatible provider endpoint (Groq, Ollama, OpenRouter, etc.).
     std::string ai_api_base = "https://api.openai.com/v1";
     std::string ai_api_key_env = "OPENAI_API_KEY";
+    // UI-managed file path with {provider, model, api_base, api_key}.
+    // Overrides all three above when present. Default: ~/.config/linuxcomplete/api_keys.json
+    std::string ai_api_key_file = "";
     std::string dict_dir;
     std::string user_dict_path;
 

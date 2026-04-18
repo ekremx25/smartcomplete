@@ -6,6 +6,7 @@
 #include <cstring>
 #include <deque>
 #include <filesystem>
+#include <fstream>
 #include <iostream>
 #include <mutex>
 #include <nlohmann/json.hpp>
@@ -131,6 +132,57 @@ std::string exec_curl(const std::vector<std::string>& args, int timeout_seconds)
     return {};
 }
 
+// ---------------------------------------------------------------------------
+// Resolved credentials: the final (api_key, api_base, model) used for a request.
+// Priority:
+//   1. UI-managed JSON file at config.api_key_file (if exists and valid)
+//   2. Environment variable fallback + config defaults
+// The file wins so the UI (Quickshell Settings → API Keys) is the source of truth.
+// ---------------------------------------------------------------------------
+struct ResolvedCredentials {
+    std::string api_key;
+    std::string api_base;
+    std::string model;
+    bool from_file = false;
+};
+
+ResolvedCredentials resolve_credentials(const AiRerankerConfig& config) {
+    ResolvedCredentials out;
+    out.api_base = config.api_base;
+    out.model = config.model;
+
+    // Try UI-managed JSON file first.
+    if (!config.api_key_file.empty() && std::filesystem::exists(config.api_key_file)) {
+        std::ifstream file(config.api_key_file);
+        if (file.is_open()) {
+            nlohmann::json parsed = nlohmann::json::parse(file, nullptr, false);
+            if (!parsed.is_discarded() && parsed.is_object()) {
+                if (parsed.contains("api_key") && parsed["api_key"].is_string()) {
+                    out.api_key = parsed["api_key"].get<std::string>();
+                }
+                if (parsed.contains("api_base") && parsed["api_base"].is_string()) {
+                    out.api_base = parsed["api_base"].get<std::string>();
+                }
+                if (parsed.contains("model") && parsed["model"].is_string()) {
+                    out.model = parsed["model"].get<std::string>();
+                }
+                if (!out.api_key.empty()) {
+                    out.from_file = true;
+                    return out;
+                }
+            }
+        }
+    }
+
+    // Fall back to environment variable.
+    if (const char* env_key = std::getenv(config.api_key_env.c_str())) {
+        if (env_key[0] != '\0') {
+            out.api_key = env_key;
+        }
+    }
+    return out;
+}
+
 } // namespace
 
 // ---------------------------------------------------------------------------
@@ -140,8 +192,9 @@ std::string exec_curl(const std::vector<std::string>& args, int timeout_seconds)
 AiReranker::AiReranker(AiRerankerConfig config) : config_(std::move(config)) {}
 
 bool AiReranker::is_enabled() const {
-    const char* api_key = std::getenv(config_.api_key_env.c_str());
-    return config_.enabled && api_key && api_key[0] != '\0';
+    if (!config_.enabled) return false;
+    const auto creds = resolve_credentials(config_);
+    return !creds.api_key.empty();
 }
 
 std::vector<Candidate> AiReranker::rerank(const std::vector<Candidate>& candidates,
@@ -379,9 +432,12 @@ void AiReranker::log_debug(const std::string& message) const {
 // ---------------------------------------------------------------------------
 std::string AiReranker::request_ranking(const std::vector<Candidate>& candidates,
                                         const AiRerankRequest& request) const {
-    const char* api_key = std::getenv(config_.api_key_env.c_str());
-    if (!api_key || api_key[0] == '\0') {
+    const auto creds = resolve_credentials(config_);
+    if (creds.api_key.empty()) {
         return {};
+    }
+    if (creds.from_file) {
+        log_debug("using credentials from api_key_file (provider: " + creds.api_base + ", model: " + creds.model + ")");
     }
 
     // Allow test injection for regression tests (no network call).
@@ -403,9 +459,10 @@ std::string AiReranker::request_ranking(const std::vector<Candidate>& candidates
         ", last_word=" + request.last_word +
         ", sentence_start=" + std::string(request.sentence_start ? "true" : "false");
 
-    // Chat Completions API payload.
+    // Chat Completions API payload — model comes from resolved creds
+    // (file-based override wins over static config).
     nlohmann::json payload = {
-        {"model", config_.model},
+        {"model", creds.model},
         {"messages", nlohmann::json::array({
             {
                 {"role", "system"},
@@ -450,12 +507,12 @@ std::string AiReranker::request_ranking(const std::vector<Candidate>& candidates
 
     // Build curl argv — no shell, direct exec.
     const int timeout_seconds = std::max(1, config_.timeout_ms / 1000);
-    const std::string auth_header = "Authorization: Bearer " + std::string(api_key);
+    const std::string auth_header = "Authorization: Bearer " + creds.api_key;
     const std::string data_arg = "@" + temp_guard.path;
 
-    // Compose the final URL from the configurable base; remove trailing slash
+    // Compose the final URL from the resolved base; remove trailing slash
     // so "https://host/v1" + "/chat/completions" doesn't produce a double slash.
-    std::string base = config_.api_base;
+    std::string base = creds.api_base;
     while (!base.empty() && base.back() == '/') base.pop_back();
     const std::string endpoint = base + "/chat/completions";
 

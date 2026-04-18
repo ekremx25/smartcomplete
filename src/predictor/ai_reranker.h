@@ -22,6 +22,13 @@ struct AiRerankerConfig {
     // Name of the environment variable that holds the API key.
     // Defaults to OPENAI_API_KEY; use GROQ_API_KEY for Groq, etc.
     std::string api_key_env = "OPENAI_API_KEY";
+    // Optional: JSON file managed by the UI (e.g. Quickshell Settings → API Keys).
+    // When present and valid, overrides model / api_base / api_key from env.
+    // Expected shape:
+    //   { "provider": "groq", "model": "llama-3.3-70b-versatile",
+    //     "api_base": "https://api.groq.com/openai/v1", "api_key": "gsk_..." }
+    // File is read on every request (cheap — small file, kernel caches).
+    std::string api_key_file = "";
 };
 
 struct AiRerankRequest {

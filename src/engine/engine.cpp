@@ -50,6 +50,12 @@ LinuxCompleteEngine::LinuxCompleteEngine(fcitx::Instance* instance)
     }
 
     config.user_dict_path = config_dir + "/user/learned.txt";
+    // Default UI-managed key file (Quickshell Settings → API Keys writes here).
+    // Config can override via "ai_api_key_file" to use a different path.
+    if (config.ai_api_key_file.empty()) {
+        config.ai_api_key_file =
+            (std::filesystem::path(home) / ".config" / "linuxcomplete" / "api_keys.json").string();
+    }
     apply_predictor_env_overrides(config);
 
     predictor_ = std::make_unique<Predictor>(config);
