@@ -144,6 +144,9 @@ struct ResolvedCredentials {
     std::string api_base;
     std::string model;
     bool from_file = false;
+    // Explicit local-only mode — user has opted out of AI via the UI.
+    // When true, we never fall through to env var and never make network calls.
+    bool force_disabled = false;
 };
 
 ResolvedCredentials resolve_credentials(const AiRerankerConfig& config) {
@@ -157,6 +160,17 @@ ResolvedCredentials resolve_credentials(const AiRerankerConfig& config) {
         if (file.is_open()) {
             nlohmann::json parsed = nlohmann::json::parse(file, nullptr, false);
             if (!parsed.is_discarded() && parsed.is_object()) {
+                // Explicit local-only mode short-circuits everything.
+                const std::string provider = parsed.value("provider", std::string{});
+                const bool ai_disabled_flag = parsed.contains("ai_enabled") &&
+                                              parsed["ai_enabled"].is_boolean() &&
+                                              !parsed["ai_enabled"].get<bool>();
+                if (provider == "local" || ai_disabled_flag) {
+                    out.force_disabled = true;
+                    out.from_file = true;
+                    return out;
+                }
+
                 if (parsed.contains("api_key") && parsed["api_key"].is_string()) {
                     out.api_key = parsed["api_key"].get<std::string>();
                 }
@@ -194,6 +208,7 @@ AiReranker::AiReranker(AiRerankerConfig config) : config_(std::move(config)) {}
 bool AiReranker::is_enabled() const {
     if (!config_.enabled) return false;
     const auto creds = resolve_credentials(config_);
+    if (creds.force_disabled) return false;  // explicit local-only mode
     return !creds.api_key.empty();
 }
 
