@@ -140,7 +140,7 @@ std::string exec_curl(const std::vector<std::string>& args, int timeout_seconds)
 AiReranker::AiReranker(AiRerankerConfig config) : config_(std::move(config)) {}
 
 bool AiReranker::is_enabled() const {
-    const char* api_key = std::getenv("OPENAI_API_KEY");
+    const char* api_key = std::getenv(config_.api_key_env.c_str());
     return config_.enabled && api_key && api_key[0] != '\0';
 }
 
@@ -235,8 +235,26 @@ std::vector<std::string> AiReranker::parse_ranked_words(const std::string& respo
 
     std::vector<std::string> ranked_words;
     for (const auto& entry : parsed["ranking"]) {
+        // Preferred shape: plain string array {"ranking": ["word1", "word2", ...]}
         if (entry.is_string()) {
             ranked_words.push_back(entry.get<std::string>());
+            continue;
+        }
+        // Tolerated shape 1: array of objects with "word" field
+        // {"ranking": [{"word": "x"}, ...]}  — some models echo the input schema.
+        if (entry.is_object() && entry.contains("word") && entry["word"].is_string()) {
+            ranked_words.push_back(entry["word"].get<std::string>());
+            continue;
+        }
+        // Tolerated shape 2: nested array [[{"word": "x"}, ...]] — Llama-8b does this.
+        if (entry.is_array()) {
+            for (const auto& inner : entry) {
+                if (inner.is_string()) {
+                    ranked_words.push_back(inner.get<std::string>());
+                } else if (inner.is_object() && inner.contains("word") && inner["word"].is_string()) {
+                    ranked_words.push_back(inner["word"].get<std::string>());
+                }
+            }
         }
     }
     return ranked_words;
@@ -361,7 +379,7 @@ void AiReranker::log_debug(const std::string& message) const {
 // ---------------------------------------------------------------------------
 std::string AiReranker::request_ranking(const std::vector<Candidate>& candidates,
                                         const AiRerankRequest& request) const {
-    const char* api_key = std::getenv("OPENAI_API_KEY");
+    const char* api_key = std::getenv(config_.api_key_env.c_str());
     if (!api_key || api_key[0] == '\0') {
         return {};
     }
@@ -393,8 +411,11 @@ std::string AiReranker::request_ranking(const std::vector<Candidate>& candidates
                 {"role", "system"},
                 {"content",
                  "You rerank autocomplete candidates. Prefer grammatical, natural, and contextually "
-                 "likely choices. Preserve only existing candidate words. Return strict JSON with "
-                 "shape {\"ranking\":[...]} and no extra text."}
+                 "likely choices. Preserve only existing candidate words. "
+                 "Return strict JSON with this exact shape: "
+                 "{\"ranking\": [\"word1\", \"word2\", \"word3\"]} — a flat array of WORDS as strings, "
+                 "ordered from best to worst. Do not return objects, do not include scores, "
+                 "do not add markdown code fences, do not add any explanation."}
             },
             {
                 {"role", "user"},
@@ -432,16 +453,22 @@ std::string AiReranker::request_ranking(const std::vector<Candidate>& candidates
     const std::string auth_header = "Authorization: Bearer " + std::string(api_key);
     const std::string data_arg = "@" + temp_guard.path;
 
+    // Compose the final URL from the configurable base; remove trailing slash
+    // so "https://host/v1" + "/chat/completions" doesn't produce a double slash.
+    std::string base = config_.api_base;
+    while (!base.empty() && base.back() == '/') base.pop_back();
+    const std::string endpoint = base + "/chat/completions";
+
     std::vector<std::string> curl_args = {
         "curl", "-sS",
         "--max-time", std::to_string(timeout_seconds),
-        "https://api.openai.com/v1/chat/completions",
+        endpoint,
         "-H", auth_header,
         "-H", "Content-Type: application/json",
         "--data-binary", data_arg
     };
 
-    log_debug("sending rerank request (" + std::to_string(candidates.size()) + " candidates)");
+    log_debug("sending rerank request to " + endpoint + " (" + std::to_string(candidates.size()) + " candidates)");
     const std::string response_body = exec_curl(curl_args, timeout_seconds + 2);
 
     if (response_body.empty()) {

@@ -16,6 +16,12 @@ struct AiRerankerConfig {
     int timeout_ms = 1200;
     int uncertainty_gap_threshold = 160;
     std::size_t max_cache_entries = 128;
+    // Base URL for the OpenAI-compatible API (everything before /chat/completions).
+    // Defaults to OpenAI; switch to Groq / Ollama / OpenRouter / etc. without code changes.
+    std::string api_base = "https://api.openai.com/v1";
+    // Name of the environment variable that holds the API key.
+    // Defaults to OPENAI_API_KEY; use GROQ_API_KEY for Groq, etc.
+    std::string api_key_env = "OPENAI_API_KEY";
 };
 
 struct AiRerankRequest {

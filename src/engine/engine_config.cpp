@@ -33,6 +33,8 @@ void load_predictor_config_from_file(const std::filesystem::path& path, Predicto
     read_bool("ai_smart_fallback", config.ai_smart_fallback);
     read_bool("ai_debug_logging", config.ai_debug_logging);
     read_str("ai_model", config.ai_model);
+    read_str("ai_api_base", config.ai_api_base);
+    read_str("ai_api_key_env", config.ai_api_key_env);
     read_int("ai_timeout_ms", config.ai_timeout_ms);
     read_int("ai_uncertainty_gap_threshold", config.ai_uncertainty_gap_threshold);
     if (parsed.contains("ai_max_cache_entries") && parsed["ai_max_cache_entries"].is_number_integer()) {

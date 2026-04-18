@@ -29,6 +29,9 @@ struct PredictorConfig {
     int ai_timeout_ms = 1200;
     int ai_uncertainty_gap_threshold = 160;
     int ai_max_cache_entries = 128;
+    // OpenAI-compatible provider endpoint (Groq, Ollama, OpenRouter, etc.).
+    std::string ai_api_base = "https://api.openai.com/v1";
+    std::string ai_api_key_env = "OPENAI_API_KEY";
     std::string dict_dir;
     std::string user_dict_path;
 

@@ -277,7 +277,9 @@ std::vector<Candidate> Predictor::predict(const std::string& prefix) const {
                          config_.ai_model,
                          config_.ai_timeout_ms,
                          config_.ai_uncertainty_gap_threshold,
-                         static_cast<size_t>(std::max(1, config_.ai_max_cache_entries))});
+                         static_cast<size_t>(std::max(1, config_.ai_max_cache_entries)),
+                         config_.ai_api_base,
+                         config_.ai_api_key_env});
     return reranker.rerank(filtered,
                            {prefix, previous_word_, last_word_, sentence_start_, false});
 }
@@ -502,7 +504,9 @@ std::vector<Candidate> Predictor::predict_next_word() const {
                          config_.ai_model,
                          config_.ai_timeout_ms,
                          config_.ai_uncertainty_gap_threshold,
-                         static_cast<size_t>(std::max(1, config_.ai_max_cache_entries))});
+                         static_cast<size_t>(std::max(1, config_.ai_max_cache_entries)),
+                         config_.ai_api_base,
+                         config_.ai_api_key_env});
     return reranker.rerank(results,
                            {"", previous_word_, last_word_, sentence_start_, true});
 }
