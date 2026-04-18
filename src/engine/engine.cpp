@@ -164,9 +164,14 @@ void LinuxCompleteEngine::keyEvent(const fcitx::InputMethodEntry&, fcitx::KeyEve
     if (key.check(FcitxKey_Down) || key.check(FcitxKey_Up)) {
         if (current_candidates_.empty()) return;
         const int n = static_cast<int>(current_candidates_.size());
+        // Fcitx5's candidate list shows the first item as visually-highlighted by
+        // default. So treat unset/-1 as "cursor is at 0" before advancing, or the
+        // internal index drifts one step behind the highlight and Tab commits the
+        // wrong word.
+        const int base = (selected_index_ < 0) ? 0 : selected_index_;
         selected_index_ = key.check(FcitxKey_Down)
-            ? (selected_index_ + 1) % n
-            : (selected_index_ - 1 + n) % n;
+            ? (base + 1) % n
+            : (base - 1 + n) % n;
         auto& panel = ic->inputPanel();
         auto list = panel.candidateList();
         if (list) {
