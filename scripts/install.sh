@@ -77,6 +77,7 @@ elif pgrep -x niri &>/dev/null; then COMPOSITOR="niri"
 elif pgrep -x sway &>/dev/null; then COMPOSITOR="sway"
 elif pgrep -x gnome-shell &>/dev/null; then COMPOSITOR="gnome"
 elif pgrep -x plasmashell &>/dev/null; then COMPOSITOR="kde"
+elif pgrep -x cosmic-comp &>/dev/null; then COMPOSITOR="cosmic"
 elif [ "$SESSION_TYPE" = "x11" ]; then COMPOSITOR="x11"
 fi
 
@@ -85,6 +86,7 @@ SHELL_RC=""
 case "${SHELL:-}" in
     */zsh)  [ -f "$HOME/.zshrc" ] && SHELL_RC="$HOME/.zshrc" ;;
     */bash) [ -f "$HOME/.bashrc" ] && SHELL_RC="$HOME/.bashrc" ;;
+    */fish) [ -f "$HOME/.config/fish/config.fish" ] && SHELL_RC="$HOME/.config/fish/config.fish" ;;
     *)
         [ -f "$HOME/.zshrc" ] && SHELL_RC="$HOME/.zshrc"
         [ -z "$SHELL_RC" ] && [ -f "$HOME/.bashrc" ] && SHELL_RC="$HOME/.bashrc"
@@ -176,11 +178,50 @@ ok "User data directory ready"
 # ── Step 4: Configure environment variables ───────────────────
 step 4 "Configuring environment variables..."
 
-if [ -n "$SHELL_RC" ]; then
-    if grep -q "GTK_IM_MODULE=fcitx" "$SHELL_RC" 2>/dev/null; then
-        ok "Environment variables already configured in $SHELL_RC"
+# COSMIC and other systemd-based sessions: use environment.d for session-wide
+# env vars that reach GUI apps, not just terminal-launched ones.
+ENV_D_DIR="$HOME/.config/environment.d"
+ENV_D_FILE="$ENV_D_DIR/im.conf"
+
+write_env_d() {
+    mkdir -p "$ENV_D_DIR"
+    if [ -f "$ENV_D_FILE" ] && grep -q "GTK_IM_MODULE=fcitx" "$ENV_D_FILE" 2>/dev/null; then
+        ok "Environment variables already in $ENV_D_FILE"
     else
-        cat >> "$SHELL_RC" << 'ENVBLOCK'
+        cat > "$ENV_D_FILE" << 'EOF'
+# SmartComplete — Input Method Configuration (session-wide via systemd)
+GTK_IM_MODULE=fcitx
+QT_IM_MODULE=fcitx
+XMODIFIERS=@im=fcitx
+SDL_IM_MODULE=fcitx
+GLFW_IM_MODULE=ibus
+EOF
+        ok "Environment variables written to $ENV_D_FILE"
+    fi
+}
+
+# Shell RC: also set env vars for terminal sessions.
+# Fish uses `set -gx`, bash/zsh use `export`.
+write_shell_rc() {
+    local rc="$1"
+    if grep -q "GTK_IM_MODULE" "$rc" 2>/dev/null; then
+        ok "Environment variables already configured in $rc"
+        return
+    fi
+    case "$rc" in
+        *.fish)
+            cat >> "$rc" << 'ENVBLOCK'
+
+# SmartComplete — Input Method Configuration
+set -gx GTK_IM_MODULE fcitx
+set -gx QT_IM_MODULE fcitx
+set -gx XMODIFIERS @im=fcitx
+set -gx SDL_IM_MODULE fcitx
+set -gx GLFW_IM_MODULE ibus
+ENVBLOCK
+            ;;
+        *)
+            cat >> "$rc" << 'ENVBLOCK'
 
 # SmartComplete — Input Method Configuration
 export GTK_IM_MODULE=fcitx
@@ -189,20 +230,37 @@ export XMODIFIERS=@im=fcitx
 export SDL_IM_MODULE=fcitx
 export GLFW_IM_MODULE=ibus
 ENVBLOCK
-        ok "Environment variables added to $SHELL_RC"
-    fi
-    export GTK_IM_MODULE=fcitx QT_IM_MODULE=fcitx XMODIFIERS=@im=fcitx
-    export SDL_IM_MODULE=fcitx GLFW_IM_MODULE=ibus
-else
-    warn "No shell RC file detected. Add these to your shell profile:"
-    cat <<'EOF'
+            ;;
+    esac
+    ok "Environment variables added to $rc"
+}
+
+case "$COMPOSITOR" in
+    cosmic)
+        # COSMIC is systemd-based: environment.d is the primary mechanism.
+        write_env_d
+        # Also write shell RC for terminal sessions.
+        [ -n "$SHELL_RC" ] && write_shell_rc "$SHELL_RC"
+        ;;
+    *)
+        # Other compositors: shell RC is the primary mechanism.
+        if [ -n "$SHELL_RC" ]; then
+            write_shell_rc "$SHELL_RC"
+        else
+            warn "No shell RC file detected. Add these to your shell profile:"
+            cat <<'EOF'
       export GTK_IM_MODULE=fcitx
       export QT_IM_MODULE=fcitx
       export XMODIFIERS=@im=fcitx
       export SDL_IM_MODULE=fcitx
       export GLFW_IM_MODULE=ibus
 EOF
-fi
+        fi
+        ;;
+esac
+
+export GTK_IM_MODULE=fcitx QT_IM_MODULE=fcitx XMODIFIERS=@im=fcitx
+export SDL_IM_MODULE=fcitx GLFW_IM_MODULE=ibus
 
 # ── Step 5: Configure Fcitx5 profile ──────────────────────────
 step 5 "Configuring Fcitx5 profile..."
@@ -320,7 +378,7 @@ case "$COMPOSITOR" in
         add_autostart_line "$HOME/.config/sway/config" \
             "# SmartComplete" "exec fcitx5 -d"
         ;;
-    gnome|kde)
+    gnome|kde|cosmic)
         # Create a standard XDG autostart entry.
         mkdir -p "$HOME/.config/autostart"
         DESKTOP_FILE="$HOME/.config/autostart/fcitx5.desktop"

@@ -12,7 +12,7 @@ cd smartcomplete
 ./install.sh
 ```
 
-That's it. The installer detects your distro (Arch, Debian, Fedora), installs dependencies, builds the project, runs the test suite, installs the Fcitx5 addon, configures environment variables, sets up the Fcitx5 profile, wires autostart into your compositor (Hyprland, Niri, Sway, GNOME, KDE), and verifies the installation — all in one run.
+That's it. The installer detects your distro (Arch, Debian, Fedora), installs dependencies, builds the project, runs the test suite, installs the Fcitx5 addon, configures environment variables, sets up the Fcitx5 profile, wires autostart into your compositor (Hyprland, Niri, Sway, GNOME, KDE, COSMIC), and verifies the installation — all in one run.
 
 **Uninstall:** `./uninstall.sh` (add `--purge` to also delete your learned words).
 
